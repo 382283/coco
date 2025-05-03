@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head><title>英語翻訳</title></head>
+<body>
+    <h1>日本語 → 英語 翻訳</h1>
+    <form method="post">
+        <textarea name="japanese_text" rows="3" cols="50" placeholder="日本語で話したいことを書いてください"></textarea><br>
+        <input type="submit" value="翻訳する">
+    </form>
+
+    {% if translated %}
+        <h2>翻訳結果:</h2>
+        <p>{{ translated }}</p>
+    {% endif %}
+</body>
+</html>
