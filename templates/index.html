@@ -1,16 +1,30 @@
-<!doctype html>
-<html>
-<head><title>英語翻訳</title></head>
-<body>
-    <h1>日本語 → 英語 翻訳</h1>
-    <form method="post">
-        <textarea name="japanese_text" rows="3" cols="50" placeholder="日本語で話したいことを書いてください"></textarea><br>
-        <input type="submit" value="翻訳する">
-    </form>
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css')}}"
+    />
+    <title>日本語翻訳チャット</title>
+  </head>
+  <body>
+    <h1>英語翻訳チャット</h1>
+    {% for item in history %}
+    <span>あなた:あなた:</span>{{ item.japanese_text}} <span>AI:</span>{{
+    item.english_text }} {% endfor %}
 
-    {% if translated %}
-        <h2>翻訳結果:</h2>
-        <p>{{ translated }}</p>
-    {% endif %}
-</body>
+    <form method="POST" id="chat-form">
+      <input
+        type="text"
+        name="japanese_text"
+        id="japanese_text"
+        placeholder="日本語を入力"
+        required
+      />
+      <button type="submit">送信</button>
+    </form>
+    <script src="{{url_for('static', filename='main.js')}}"></script>
+  </body>
 </html>
