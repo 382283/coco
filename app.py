@@ -1,39 +1,38 @@
-# app.py
-from flask import Flask, request, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask import Flask, render_template, request, send_from_directory
 from googletrans import Translator
+from gtts import gTTS
 import os
 
-from models import db, Translation
-
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///translations.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.secret_key = os.urandom(24)
+app.config["AUDIO_FOLDER"] = "static/audio"
 
-db.init_app(app)
-migrate = Migrate(app, db)
-
-translator = Translator()
+os.makedirs(app.config["AUDIO_FOLDER"], exist_ok=True)
 
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == "POST":
-        japanese = request.form.get("japanese_text")
-        if japanese:
-            english = translator.translate(japanese, src="ja", dest="en").text
+    text_en = ""
+    audio_file = None
 
-            new_translation = Translation(japanese_text=japanese, english_text=english)
-            db.session.add(new_translation)
-            db.session.commit()
-            return redirect(url_for("index"))
-    history = Translation.query.all()
-    return render_template("index.html", history=history)
+    if request.method == "POST":
+        translator = Translator()
+        text_ja = request.form["input_text"]
+        text_en = translator.translate(text_ja, src="ja", dest="en").text
+
+        # 音声ファイルを作成
+        tts = gTTS(text=text_en, lang="en")
+        audio_file = "output.mp3"
+        audio_path = os.path.join(app.config["AUDIO_FOLDER"], audio_file)
+        tts.save(audio_path)
+
+    return render_template("index.html", text_en=text_en, audio_file=audio_file)
+
+
+# オーディオファイルを提供するルート（必要に応じて）
+@app.route("/audio/<filename>")
+def serve_audio(filename):
+    return send_from_directory(app.config["AUDIO_FOLDER"], filename)
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
